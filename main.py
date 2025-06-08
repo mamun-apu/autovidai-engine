@@ -1,5 +1,5 @@
 import json
-#from stages.stage_1_idea_engine import generate_video_idea
+from stages.stage_1_idea_engine import generate_video_idea
 
 # This is the main function that will run our entire workflow.
 def run_pipeline():
@@ -32,3 +32,4 @@ def run_pipeline():
 # This block ensures the pipeline runs when you execute the script directly.
 if __name__ == "__main__":
     run_pipeline()
+    print("hello world!")
