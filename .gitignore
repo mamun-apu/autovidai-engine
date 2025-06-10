@@ -1,0 +1,19 @@
+# --- Virtual Environment ---
+# Ignore the virtual environment folder, which contains installed packages.
+venv/
+*.venv
+env/
+
+# --- Environment Variables ---
+# Ignore the .env file to keep secret API keys out of version control.
+.env
+
+# --- Python ---
+# Ignore Python's compiled bytecode and cache folders.
+__pycache__/
+*.pyc
+
+# --- IDE / OS Specific ---
+# Ignore macOS specific metadata files.
+.DS_Store
+
