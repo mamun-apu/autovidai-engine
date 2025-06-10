@@ -30,7 +30,6 @@ def generate_video_idea(niche: str) -> dict:
         "cta": "A clear, short call-to-action for the end of the video."
     }}
     """
-
     print("Generating idea with Gemini AI...")
     headers = {'Content-Type': 'application/json'}
     payload = {"contents": [{"parts": [{"text": master_prompt}]}]}
