@@ -1,5 +1,6 @@
 import json
 from stages.stage_1_idea_engine import generate_video_idea
+from stages.stage_2_scriptwriter import generate_video_script
 
 # This is the main function that will run our entire workflow.
 def run_pipeline():
@@ -24,9 +25,15 @@ def run_pipeline():
     print(json.dumps(video_idea, indent=4))
     print("-" * 50)
 
-    # --- Subsequent stages will be called here ---
-    # e.g., video_script = generate_video_script(video_idea)
-    # ...and so on.
+   # === STAGE 2: SCRIPTWRITER ===
+    video_script = generate_video_script(video_idea)
+    if "error" in video_script:
+        print("❗️ Pipeline stopped due to an error in Stage 2.")
+        return
+
+    print("\n✅ Pipeline Stage 2 Complete. Script received:")
+    print(json.dumps(video_script, indent=4))
+    print("-" * 50)
 
 
 # This block ensures the pipeline runs when you execute the script directly.
