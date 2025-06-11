@@ -16,38 +16,50 @@ def render_video(scenes: list, title: str) -> dict:
     Renders the final video using the Shotstack API by building a timeline
     from the provided scenes.
     """
-    print("--- Stage 4: Renderer (Using Shotstack - Simple Test) ---")
+    print("--- Stage 4: Renderer (Using Shotstack) ---")
 
     # Configure the Shotstack SDK host
     configuration = shotstack_sdk.Configuration(host="https://api.shotstack.io/" + SHOTSTACK_STAGE)
     
     with shotstack_sdk.ApiClient(configuration) as api_client:
-        # Instead of relying on the configuration object, we will manually
-        # set the exact header the server is asking for.
+        # Manually set the x-api-key header for authentication
         api_client.set_default_header('x-api-key', SHOTSTACK_API_KEY)
         
         api_instance = edit_api.EditApi(api_client)
 
-        # --- THIS IS THE FIX ---
-        # Using a reliable, public domain video URL from the Internet Archive
-        # to bypass hotlinking protection.
-        clips = [
-            Clip(
-                asset=VideoAsset(src="https://archive.org/download/BigBuckBunny_124/Content/big_buck_bunny_720p_surround.mp4", volume=1.0),
-                start=0.0,
-                length=5.0
-            ),
-            Clip(
-                asset=TitleAsset(text="Hello World!", style="subtitle"),
-                start=0.0,
-                length=5.0
-            )
-        ]
+        clips = []
+        start_time = 0.0
         
-        # Using a stable, public domain music URL.
-        soundtrack = Soundtrack(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", effect="fadeOut", volume=0.2)
-        # ----------------------
+        # This loop now uses the real data from the previous stages
+        for scene in scenes:
+            # A simple way to estimate scene duration based on narration length
+            words_per_second = 2.5
+            duration = max(len(scene["narration"].split()) / words_per_second, 3.0) # Min 3s duration
 
+            # Add the Pexels video clip to the timeline
+            video_clip = Clip(
+                asset=VideoAsset(src=scene["video_url"], volume=1.0),
+                start=start_time,
+                length=duration
+            )
+            
+            # Add the caption overlay
+            caption_asset = TitleAsset(text=scene["narration"], style="subtitle")
+            caption_clip = Clip(
+                asset=caption_asset,
+                start=start_time,
+                length=duration
+            )
+
+            clips.append(video_clip)
+            clips.append(caption_clip)
+            
+            # Increment the start time for the next scene
+            start_time += duration
+
+        # Use a reliable public domain music URL.
+        soundtrack = Soundtrack(src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", effect="fadeOut", volume=0.2)
+        
         timeline = Timeline(background="#000000", tracks=[Track(clips=clips)], soundtrack=soundtrack)
         output = Output(format="mp4", resolution="1080")
         edit = Edit(timeline=timeline, output=output)
