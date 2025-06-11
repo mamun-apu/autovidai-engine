@@ -3,7 +3,7 @@ import os
 from stages.stage_1_idea_engine import generate_video_idea
 from stages.stage_2_scriptwriter import generate_video_script
 from stages.stage_3_media_engine import get_visual_for_scene, get_audio_for_scene
-from stages.stage_4_renderer import render_video 
+from stages.stage_4_renderer import render_video
 
 
 
@@ -41,17 +41,13 @@ def run_pipeline():
     print("\n✅ Stage 3 Complete.\n" + "-"*50)
 
 
-     # === STAGE 4: RENDERER ===
+    # Stage 4 - Calling the new Shotstack renderer
     render_result = render_video(scenes_with_assets, video_idea.get("title", "Untitled Video"))
     if "error" in render_result: return print("❗️ Pipeline stopped in Stage 4.")
     
     print("\n✅ Stage 4 Complete. Video Rendered!")
     print(f"  -> Final Video URL: {render_result['final_video_url']}")
-
     print("\n🎉 AutoVidAI Pipeline Finished Successfully! 🎉")
-
-    print("\n🎉 AutoVidAI Pipeline Finished Successfully! 🎉")
-    print("All stages before rendering are complete.")
 
 
 if __name__ == "__main__":

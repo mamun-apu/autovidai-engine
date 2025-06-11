@@ -10,6 +10,7 @@ def get_visual_for_scene(visual_prompt: str) -> dict:
     Finds a relevant stock video for a scene's visual description using Pexels.
     """
     print(f"  - Searching for video: '{visual_prompt}'")
+
     
     # Sanitize the prompt for a better search query
     query = re.sub(r'[^\w\s-]', '', visual_prompt).strip()
@@ -85,6 +86,7 @@ def get_audio_for_scene(narration_text: str, scene_index: int) -> dict:
             
         print(f"    -> ✅ Audio saved to: {output_path}")
         return {"audio_path": output_path}
+        
 
     except Exception as e:
         print(f"    -> ❌ ElevenLabs API Error: {e}")
