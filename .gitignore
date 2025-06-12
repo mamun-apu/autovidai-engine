@@ -4,9 +4,12 @@ venv/
 *.venv
 env/
 
+
 # --- Environment Variables ---
 # Ignore the .env file to keep secret API keys out of version control.
 .env
+client_secret.json
+token.json
 
 # --- Python ---
 # Ignore Python's compiled bytecode and cache folders.
@@ -14,6 +17,5 @@ __pycache__/
 *.pyc
 
 # --- IDE / OS Specific ---
-# Ignore macOS specific metadata files.
-.DS_Store
+ .DS_Store
 

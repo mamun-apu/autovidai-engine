@@ -9,7 +9,7 @@ from stages.stage_4_renderer import render_video
 
 def run_pipeline():
     print("🚀 Starting AutoVidAI Pipeline...")
-    niche = "Stoicism"
+    niche = "Incredible Animal Camouflage"
 
     # === STAGE 1: IDEA ENGINE ===
     video_idea = generate_video_idea(niche)
