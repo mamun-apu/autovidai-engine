@@ -2,7 +2,7 @@ import os
 import time
 import requests
 import json
-from config import RUNWAYML_API_KEY, ELEVENLABS_API_KEY
+from config import RUNWAYML_API_KEY
 
 def generate_visual_for_scene(visual_prompt: str, scene_index: int) -> dict:
     """
@@ -70,39 +70,3 @@ def generate_visual_for_scene(visual_prompt: str, scene_index: int) -> dict:
     except Exception as e:
         print(f"    -> ❌ An unexpected error occurred: {e}")
         return {"error": "An unexpected error occurred in visual generation", "details": str(e)}
-
-
-def get_audio_for_scene(narration_text: str, scene_index: int) -> dict:
-    """
-    Generates a voiceover for a scene's narration using the ElevenLabs API and saves it locally.
-    """
-    print(f"  - Generating audio for: '{narration_text}'")
-    
-    os.makedirs('temp', exist_ok=True)
-    output_path = os.path.join('temp', f'scene_{scene_index+1}_audio.mp3')
-
-    tts_url = "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM"
-    headers = {
-        "Accept": "audio/mpeg",
-        "Content-Type": "application/json",
-        "xi-api-key": ELEVENLABS_API_KEY
-    }
-    data = {
-        "text": narration_text,
-        "model_id": "eleven_monolingual_v1",
-        "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
-    }
-
-    try:
-        response = requests.post(tts_url, json=data, headers=headers)
-        response.raise_for_status()
-
-        with open(output_path, 'wb') as f:
-            f.write(response.content)
-            
-        print(f"    -> ✅ Audio saved to: {output_path}")
-        return {"audio_path": output_path}
-
-    except Exception as e:
-        print(f"    -> ❌ ElevenLabs API Error: {e}")
-        return {"error": "ElevenLabs API request failed", "details": str(e)}
