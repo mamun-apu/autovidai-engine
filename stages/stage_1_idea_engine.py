@@ -15,11 +15,9 @@ def generate_video_idea(niche: str) -> dict:
 
     # This "master prompt" tells the AI its role and the exact JSON format to return.
     master_prompt = f"""
-    You are an expert social media strategist specializing in creating viral short-form videos.
-    Your task is to generate a complete video concept based on the niche: {niche}.
-
-    Return your response as a single, minified JSON object with NO markdown formatting.
-    The JSON object must have the following structure:
+    You're a social media expert who knows how to make short-form videos go viral.
+    Your job is to come up with a complete video idea for the niche: {niche}.Keep the tone natural, engaging, and attention-grabbing — something that feels exciting and made for social media.
+    Respond with only one minified JSON object — no line breaks, no markdown, no extra explanation.Make sure your response follows this format exactly:
     {{
         "title": "A short, catchy, title-case title for the video.",
         "hook": "A strong, one-sentence opening line to grab the viewer's attention.",
@@ -29,6 +27,7 @@ def generate_video_idea(niche: str) -> dict:
         ],
         "cta": "A clear, short call-to-action for the end of the video."
     }}
+    Just return the JSON — nothing else.
     """
     print("Generating idea with Gemini AI...")
     headers = {'Content-Type': 'application/json'}

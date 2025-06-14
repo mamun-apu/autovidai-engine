@@ -1,55 +1,108 @@
 import os
 import time
-from config import RUNWAYML_API_KEY
-from runwayml import RunwayML
+import requests
+import json
+from config import RUNWAYML_API_KEY, ELEVENLABS_API_KEY
 
 def generate_visual_for_scene(visual_prompt: str, scene_index: int) -> dict:
     """
-    Generates an original video clip for a scene using the RunwayML API.
+    Generates an original video clip for a scene by calling the RunwayML REST API directly.
     """
     print(f"  - Generating AI video for: '{visual_prompt}'")
 
-    try:
-        # Configure the RunwayML SDK
-        client = RunwayML(runway_api_token=RUNWAYML_API_KEY)
+    headers = {
+        'Authorization': f'Bearer {RUNWAYML_API_KEY}',
+        'Content-Type': 'application/json',
+    }
 
-        # Submit the text-to-video generation task
-        task = client.text_to_video.create(
-            model="gen2", # Use the Gen-2 model
-            prompt_text=visual_prompt,
-            duration=4, # Generate a 4-second clip
-            ratio="9:16" # Vertical format
-        )
-        task_id = task.id
+    # --- THIS IS THE FIX ---
+    # The payload to submit the text-to-video task. According to the API
+    # documentation, the model-specific parameters must be nested inside
+    # a 'text_to_video' object.
+    payload = {
+        "model": "gen2",
+        "text_to_video": {
+            "prompt_text": visual_prompt,
+            "duration": 4,
+            "ratio": "9:16"
+        }
+    }
+    # ----------------------
+
+    try:
+        # 1. Submit the task to start the video generation
+        submit_response = requests.post('https://api.runwayml.com/v1/tasks', headers=headers, json=payload)
+        submit_response.raise_for_status()
+        task_id = submit_response.json()['id']
         print(f"    -> RunwayML task submitted. Task ID: {task_id}")
 
-        # Poll the API until the video is ready
-        print("    -> Waiting for video generation...")
+        # 2. Poll the API until the video is ready
+        print("    -> Waiting for video generation... (this can take a few minutes per scene)")
         while True:
-            # Wait for 10 seconds before checking the status
             time.sleep(10)
-            retrieved_task = client.tasks.retrieve(task_id)
-            status = retrieved_task.status
-            print(f"      -> Current status: {status}")
+            status_url = f"https://api.runwayml.com/v1/tasks/{task_id}"
+            status_response = requests.get(status_url, headers=headers)
+            status_response.raise_for_status()
+            
+            status_data = status_response.json()
+            status = status_data.get('status')
+            print(f"      -> Scene {scene_index+1} status: {status}")
 
             if status == "SUCCEEDED":
-                video_url = retrieved_task.outputs.video_path
-                print(f"    -> ✅ Video generated successfully: {video_url}")
-                return {"video_url": video_url}
+                video_url = status_data.get('outputs', {}).get('video_path')
+                if video_url:
+                    print(f"    -> ✅ Video for scene {scene_index+1} generated successfully: {video_url}")
+                    return {"video_url": video_url}
+                else:
+                    print(f"    -> ❌ RunwayML task succeeded but no video path was found.")
+                    return {"error": "RunwayML task succeeded but no video found"}
+            
             elif status == "FAILED":
-                print("    -> ❌ RunwayML task failed.")
-                return {"error": "RunwayML task failed"}
+                error_detail = status_data.get('error', {}).get('detail', 'Unknown error.')
+                print(f"    -> ❌ RunwayML task failed: {error_detail}")
+                return {"error": "RunwayML task failed", "details": error_detail}
+
+    except requests.RequestException as e:
+        print(f"    -> ❌ RunwayML API Request Error: {e}")
+        if e.response:
+            print(f"      -> Response Body: {e.response.text}")
+        return {"error": "RunwayML API request failed", "details": str(e)}
+    except Exception as e:
+        print(f"    -> ❌ An unexpected error occurred: {e}")
+        return {"error": "An unexpected error occurred in visual generation", "details": str(e)}
+
+
+def get_audio_for_scene(narration_text: str, scene_index: int) -> dict:
+    """
+    Generates a voiceover for a scene's narration using the ElevenLabs API and saves it locally.
+    """
+    print(f"  - Generating audio for: '{narration_text}'")
+    
+    os.makedirs('temp', exist_ok=True)
+    output_path = os.path.join('temp', f'scene_{scene_index+1}_audio.mp3')
+
+    tts_url = "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM"
+    headers = {
+        "Accept": "audio/mpeg",
+        "Content-Type": "application/json",
+        "xi-api-key": ELEVENLABS_API_KEY
+    }
+    data = {
+        "text": narration_text,
+        "model_id": "eleven_monolingual_v1",
+        "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
+    }
+
+    try:
+        response = requests.post(tts_url, json=data, headers=headers)
+        response.raise_for_status()
+
+        with open(output_path, 'wb') as f:
+            f.write(response.content)
+            
+        print(f"    -> ✅ Audio saved to: {output_path}")
+        return {"audio_path": output_path}
 
     except Exception as e:
-        print(f"    -> ❌ RunwayML API Error: {e}")
-        return {"error": "RunwayML API request failed", "details": str(e)}
-
-# We keep the audio generation function as is
-def get_audio_for_scene(narration_text: str, scene_index: int) -> dict:
-    # This function remains unchanged from the previous version.
-    # It still calls ElevenLabs and saves the audio to the temp/ folder.
-    # For brevity, the full code is omitted here, but should be kept in your file.
-    print(f"  - Generating audio for: '{narration_text}' (Unchanged)")
-    # Simulate success for this example
-    output_path = os.path.join('temp', f'scene_{scene_index+1}_audio.mp3')
-    return {"audio_path": output_path}
+        print(f"    -> ❌ ElevenLabs API Error: {e}")
+        return {"error": "ElevenLabs API request failed", "details": str(e)}
