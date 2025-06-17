@@ -3,35 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>autovidai-engine</title>
+    <title>AI Video Generator</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>Lets start creating art by not doing anything!</h1>
-    <div>
-        <div class = "social-media">
-            <div>
-                <h1>account information</h1>
-                <p>brief introduction!</p>
+
+    <div class="app-container">
+        <header>
+            <h1>Dream Weaver</h1>
+            <p>Turn your ideas into video with AI</p>
+        </header>
+
+        <main>
+            <div id="form-card" class="card">
+                <form class="prompt-form">
+                    <label for="prompt" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Enter Your Prompt</label>
+                    <textarea id="prompt" name="prompt" placeholder="e.g., A cinematic shot of a raccoon coding on a laptop..."></textarea>
+                    <button type="submit">Generate</button>
+                </form>
             </div>
-        </div>
-        <div class = "social-media">
-            <div>
-                <h1>account information</h1>
-                <p>brief introduction!</p>
+
+            <div id="loading-card" class="card loading-section">
+                <div class="spinner"></div>
+                <p>Generating your masterpiece... <br>This can take a minute.</p>
             </div>
-        </div>
-        <div class = "social-media">
-            <div>
-                <h1>account information</h1>
-                <p>brief introduction!</p>
+
+            <div id="result-card" class="card result-section">
+                <h2>Your Generated Video</h2>
+                <video id="result-video" controls autoplay muted loop src="https://storage.googleapis.com/luma-labs-public/sample-video.mp4"></video>
+                <a id="download-link" href="https://storage.googleapis.com/luma-labs-public/sample-video.mp4" download="generated_video.mp4" class="download-button">Download Video</a>
             </div>
-        </div>
-        <div class = "social-media">
-            <div>
-                <h1>account information</h1>
-                <p>brief introduction!</p>
-            </div>
-        </div>
+        </main>
     </div>
+
+    <script src="js/script.js"></script>
 </body>
 </html>

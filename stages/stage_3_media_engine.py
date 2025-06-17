@@ -1,8 +1,13 @@
-import requests
+import os
 import time
+import requests
+import json
 from config import RUNWAYML_API_KEY
 
 def generate_visual_for_scene(visual_prompt: str, scene_index: int) -> dict:
+    """
+    Generates an original video clip for a scene by calling the RunwayML REST API directly.
+    """
     print(f"  - Generating AI video for: '{visual_prompt}'")
 
     headers = {
@@ -10,42 +15,64 @@ def generate_visual_for_scene(visual_prompt: str, scene_index: int) -> dict:
         'Content-Type': 'application/json',
     }
 
+    # --- THIS IS THE FIX ---
+    # The payload structure and endpoint URL have been corrected to match the
+    # requirements for submitting an asynchronous 'gen2' model task.
     payload = {
         "model": "gen2",
-        "input": {
+        "text_to_video": {
             "prompt_text": visual_prompt,
             "duration": 4,
             "ratio": "9:16"
         }
     }
+    
+    submit_url = "https://api.runwayml.com/v1/tasks"
+    # ----------------------
 
     try:
-        response = requests.post("https://api.runwayml.com/v1/inference", headers=headers, json=payload)
-        if response.status_code != 200:
-            print(f"    -> ❌ API Error: {response.status_code}, {response.text}")
-            return {"error": response.text}
+        # 1. Submit the task to start the video generation
+        submit_response = requests.post(submit_url, headers=headers, json=payload)
+        submit_response.raise_for_status() # This will raise an error for 4xx or 5xx responses
+        
+        task_id = submit_response.json()['id']
+        print(f"    -> RunwayML task submitted. Task ID: {task_id}")
 
-        task = response.json()
-        task_id = task["id"]
-        print(f"    -> Task ID: {task_id}")
-
-        # Poll for completion
+        # 2. Poll the API until the video is ready
+        print("    -> Waiting for video generation... (this can take a few minutes per scene)")
         while True:
             time.sleep(10)
-            status_resp = requests.get(f"https://api.runwayml.com/v1/inference/{task_id}", headers=headers)
-            status_data = status_resp.json()
-            status = status_data.get("status")
-            print(f"      -> Scene {scene_index + 1} status: {status}")
+            status_url = f"https://api.runwayml.com/v1/tasks/{task_id}"
+            status_response = requests.get(status_url, headers=headers)
+            status_response.raise_for_status()
+            
+            status_data = status_response.json()
+            status = status_data.get('status')
+            print(f"      -> Scene {scene_index+1} status: {status}")
 
-            if status == "succeeded":
-                video_url = status_data["outputs"]["video"]
-                print(f"    -> ✅ Video URL: {video_url}")
-                return {"video_url": video_url}
-            elif status == "failed":
-                error = status_data.get("error", "Unknown error")
-                print(f"    -> ❌ Task failed: {error}")
-                return {"error": error}
+            if status == "SUCCEEDED":
+                video_url = status_data.get('outputs', {}).get('video_path')
+                if video_url:
+                    print(f"    -> ✅ Video for scene {scene_index+1} generated successfully: {video_url}")
+                    return {"video_url": video_url}
+                else:
+                    print(f"    -> ❌ RunwayML task succeeded but no video path was found.")
+                    return {"error": "RunwayML task succeeded but no video found"}
+            
+            elif status == "FAILED":
+                error_detail = status_data.get('error', {}).get('detail', 'Unknown error.')
+                print(f"    -> ❌ RunwayML task failed: {error_detail}")
+                return {"error": "RunwayML task failed", "details": error_detail}
 
+    except requests.RequestException as e:
+        print(f"    -> ❌ RunwayML API Request Error: {e}")
+        if e.response:
+            print(f"      -> Response Body: {e.response.text}")
+        return {"error": "RunwayML API request failed", "details": str(e)}
     except Exception as e:
-        print(f"    -> ❌ Exception: {e}")
-        return {"error": str(e)}
+        print(f"    -> ❌ An unexpected error occurred: {e}")
+        return {"error": "An unexpected error occurred in visual generation", "details": str(e)}
+
+def get_audio_for_scene(narration_text: str, scene_index: int) -> dict:
+    # This function is not being used as per the user's request to remove audio generation.
+    pass
