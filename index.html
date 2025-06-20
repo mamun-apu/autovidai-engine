@@ -19,7 +19,7 @@
                 <form class="prompt-form">
                     <label for="prompt" style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Enter Your Prompt</label>
                     <textarea id="prompt" name="prompt" placeholder="e.g., A cinematic shot of a raccoon coding on a laptop..."></textarea>
-                    <button type="submit">Generate</button>
+                    <button id="generate-button" type="submit">Generate</button>
                 </form>
             </div>
 
@@ -30,8 +30,20 @@
 
             <div id="result-card" class="card result-section">
                 <h2>Your Generated Video</h2>
+                
+                <p class="prompt-display-label">PROMPT:</p>
+                <p id="result-prompt-display"></p>
+
                 <video id="result-video" controls autoplay muted loop src="https://storage.googleapis.com/luma-labs-public/sample-video.mp4"></video>
                 <a id="download-link" href="https://storage.googleapis.com/luma-labs-public/sample-video.mp4" download="generated_video.mp4" class="download-button">Download Video</a>
+                
+                <button id="generate-another-button" class="secondary-button">Generate Another</button>
+            </div>
+
+            <div id="error-card" class="card error-section">
+                <h2>Something Went Wrong</h2>
+                <p id="error-message">Sorry, we couldn't generate the video. Please try again.</p>
+                <button id="try-again-button" class="secondary-button">Try Again</button>
             </div>
         </main>
     </div>
