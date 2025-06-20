@@ -1,83 +1,33 @@
-/* --- Basic Setup & Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+/* --- Add these new styles to the bottom of your CSS file --- */
 
-:root {
-    --background-color: #121212;
-    --card-color: #1e1e1e;
-    --primary-color: #007bff;
-    --primary-hover-color: #0056b3;
-    --text-color: #e0e0e0;
-    --secondary-text-color: #a0a0a0;
-    --border-color: #333;
-}
-
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
-    margin: 0;
-    padding: 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-}
-
-/* --- Main App Container --- */
-.app-container {
-    width: 100%;
-    max-width: 500px;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-}
-
-header {
-    text-align: center;
-}
-
-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-header p {
+/* Style for the prompt display in the result card */
+.prompt-display-label {
+    font-size: 0.8rem;
+    font-weight: 600;
     color: var(--secondary-text-color);
-    font-size: 1rem;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
 }
 
-/* --- Main Card Styling --- */
-.card {
-    background-color: var(--card-color);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    padding: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* --- Prompt Form --- */
-.prompt-form textarea {
-    width: 100%;
+#result-prompt-display {
     background-color: var(--background-color);
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 1rem;
-    color: var(--text-color);
-    font-family: 'Inter', sans-serif;
-    font-size: 1rem;
-    resize: vertical;
-    min-height: 80px;
-    box-sizing: border-box; /* Important for padding */
+    font-size: 0.9rem;
+    white-space: pre-wrap; /* a\Allows the text to wrap */
 }
 
-.prompt-form button {
+/* A secondary button style for "Generate Another" and "Try Again" */
+.secondary-button {
     width: 100%;
-    background-color: var(--primary-color);
+    background-color: var(--border-color);
     border: none;
     border-radius: 8px;
-    padding: 1rem;
-    color: white;
+    padding: 0.8rem 1rem;
+    color: var(--text-color);
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -85,66 +35,14 @@ header p {
     transition: background-color 0.2s ease;
 }
 
-.prompt-form button:hover {
-    background-color: var(--primary-hover-color);
+.secondary-button:hover {
+    background-color: #444;
 }
 
-/* --- Loading State --- */
-.loading-section {
+/* Error section styling (initially hidden) */
+.error-section {
     display: none;
     text-align: center;
-}
-
-.spinner {
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    border-left-color: var(--primary-color);
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 1rem;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-/* --- Result State --- */
-.result-section {
-    display: none;
-}
-
-.result-section h2 {
-    font-size: 1.25rem;
-    margin-top: 0;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.result-section video {
-    width: 100%;
-    border-radius: 8px;
-    background-color: #000;
-}
-
-.result-section .download-button {
-    display: block;
-    width: 100%;
-    text-align: center;
-    background-color: #28a745;
-    border: none;
-    border-radius: 8px;
-    padding: 0.8rem 1rem;
-    color: white;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 1.5rem;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-}
-
-.result-section .download-button:hover {
-    background-color: #218838;
+    background-color: #3d1c1c; /* A reddish background for errors */
+    border-color: #a53333;
 }
